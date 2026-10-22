@@ -1,0 +1,25 @@
+# Seeded synthetic workloads. Token counts use the tokenizer in models.yaml.
+# Ranges are [min, max], sampled uniformly per session or step.
+seed: 0
+
+agent:
+  sessions: 500
+  system_prompt_tokens: 2000   # shared tool schemas, identical across sessions
+  tools: 12
+  user_task_tokens: [50, 200]
+  steps: [3, 8]
+  tool_call_output_tokens: [40, 150]
+  tool_result_tokens: [200, 1500]
+  final_answer_tokens: [150, 400]
+
+chat:
+  requests: 2000
+  # Chosen so the mean prompt + output per request is close to an agent step.
+  prompt_tokens: [500, 4000]
+  output_tokens: [40, 400]
+
+# Fixed lengths, used for the AIPerf cross-check (PLAN.md phase 1).
+fixed:
+  requests: 500
+  prompt_tokens: [1000, 1000]
+  output_tokens: [128, 128]

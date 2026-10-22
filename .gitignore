@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.pytest_cache/
+.env
+# Engine builds and model weights never go in git
+engines/
+models/
+*.safetensors
+*.engine
+# Generated workloads are reproducible from the seed
+workloads/*.jsonl
+# AIPerf artifacts: keep only the summary JSON (logs and inputs contain local paths)
+results/aiperf/**
+!results/aiperf/*/
+!results/aiperf/*/*/
+!results/aiperf/*/*/*/
+!results/aiperf/*/*/*/profile_export_aiperf.json

@@ -1,0 +1,14 @@
+[10/22/2026-09:36:24] [TRT-LLM] [I] ATTENTION RUNTIME FEATURES:  AttentionRuntimeFeatures(chunked_prefill=True, cache_reuse=True, has_speculative_draft_tokens=False, chunk_size=8192, chunked_prefill_buffer_batch_size=4)
+[10/22/2026-09:36:24] [TRT-LLM] [I] Validating KV Cache config against kv_cache_dtype="auto"
+[10/22/2026-09:36:24] [TRT-LLM] [I] KV cache quantization set to "auto". Using checkpoint KV quantization.
+[10/22/2026-09:36:29] [TRT-LLM] [I] [kv cache manager] Primary/secondary blocks for window sizes set to {16385: (639, 0)} for estimation dry run
+[TensorRT-LLM][INFO] Max KV cache blocks per sequence: 513 [window size=16385], tokens per block=32, primary blocks=639, secondary blocks=0, max sequence length=16385
+[TensorRT-LLM][INFO] [MemUsageChange] Allocated 2.81 GiB for max tokens in paged KV cache (20448).
+[10/22/2026-09:36:29] [TRT-LLM] [I] max_seq_len=16385, max_num_requests=128, max_num_tokens=8192, max_batch_size=128
+[TensorRT-LLM][WARNING] [kv cache manager] storeContextBlocks: Can not find sequence for request 128
+[10/22/2026-09:36:36] [TRT-LLM] [I] Peak memory during memory usage profiling (torch + non-torch): 12.05 GiB, available KV cache memory when calculating max tokens: 31.67 GiB, fraction is set 0.9, kv size is 147456. device total memory 44.42 GiB, , tmp kv_mem 2.81 GiB
+[10/22/2026-09:36:36] [TRT-LLM] [I] Estimated max memory in KV cache : 31.67 GiB
+[TensorRT-LLM][INFO] Max KV cache blocks per sequence: 513 [window size=16385], tokens per block=32, primary blocks=7206, secondary blocks=0, max sequence length=16385
+[TensorRT-LLM][INFO] [MemUsageChange] Allocated 31.67 GiB for max tokens in paged KV cache (230592).
+[10/22/2026-09:36:36] [TRT-LLM] [I] max_seq_len=16385, max_num_requests=128, max_num_tokens=8192, max_batch_size=128
+model='Qwen/Qwen3-4B' tokenizer=None tokenizer_mode='auto' custom_tokenizer=None skip_tokenizer_init=False trust_remote_code=False tensor_parallel_size=1 dtype='auto' revision=None tokenizer_revision=None pipeline_parallel_size=1 context_parallel_size=1 gpus_per_node=1 moe_cluster_parallel_size=-1 moe_tensor_parallel_size=-1 moe_expert_parallel_size=-1 enable_attention_dp=False enable_lm_head_tp_i

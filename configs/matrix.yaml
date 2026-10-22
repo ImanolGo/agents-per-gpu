@@ -1,0 +1,35 @@
+engines: [trtllm, vllm, sglang]
+variants: [qwen3-4b-bf16, qwen3-8b-bf16, qwen3-8b-int8, qwen3-8b-int4-awq]
+workloads: [agent, chat]
+prefix_cache: [true, false]
+concurrency: [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96]   # 3, 6 and 12 added after the first sweep showed capacity between 2 and 8
+stop_when_slo_exceeded_by: 2.0   # stop the ladder once p95 is 2x over the SLO
+repeats: 3
+warmup_requests: 20
+start_stagger_s: 2.0   # worker w sends its first request w/C x this many seconds after the start
+measure_seconds: 60    # PLAN.md said 180; shortened to fit the whole matrix in a rented-hour budget
+
+# Same limits for every engine; differences must be documented in the report.
+serving:
+  max_model_len: 16384
+  gpu_memory_fraction: 0.90
+
+# Sent with every request. ignore_eos pins output length; the client records whether each request
+# produced exactly max_tokens, so an engine that ignores the flag shows up in the results.
+request:
+  temperature: 0
+  timeout_s: 600
+  warmup_timeout_s: 300
+  extra_body:
+    ignore_eos: true
+    chat_template_kwargs: {enable_thinking: false}
+  engine_extra_body:   # per-engine overrides, merged over extra_body
+    trtllm: {}
+    vllm: {}
+    sglang: {}
+
+cost:
+  # Rental-market offer for a full A40, seen 2026-10-21 (a rental-market price, not a list price).
+  # TODO: verify before publishing, and compare with a public cloud list price.
+  a40_usd_per_hour: 0.535
+  slice_fraction: 1.0      # a "slice" is the whole GPU: the benchmark runs on a full 48 GB A40

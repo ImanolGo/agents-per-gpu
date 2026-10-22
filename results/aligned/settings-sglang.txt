@@ -1,0 +1,4 @@
+[2026-10-22 08:59:14] server_args=ServerArgs(model_path='Qwen/Qwen3-4B', tokenizer_path='Qwen/Qwen3-4B', tokenizer_mode='auto', tokenizer_worker_num=1, skip_tokenizer_init=False, load_format='auto', model_loader_extra_config='{}', trust_remote_code=False, context_length=16384, is_embedding=False, enable_multimodal=None, revision=None, model_impl='auto', host='0.0.0.0', port=8000, fastapi_root_path
+[2026-10-22 08:59:26] Using KV cache dtype: torch.bfloat16
+[2026-10-22 08:59:27] KV Cache is allocated. #tokens: 233884, K size: 16.06 GB, V size: 16.06 GB
+[2026-10-22 08:59:29] max_total_num_tokens=233884, chunked_prefill_size=8192, max_prefill_tokens=16384, max_running_requests=128, context_len=16384, available_gpu_mem=3.58 GB

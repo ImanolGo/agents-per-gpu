@@ -1,0 +1,17 @@
+# SLO profiles. These are choices made for this benchmark, not industry standards.
+# Capacity = highest concurrency where every limit holds at p95 and error rate < max_error_rate.
+max_error_rate: 0.01
+
+profiles:
+  interactive:
+    ttft_p95_s: 1.0
+    itl_p95_ms: 50
+  agent-step:
+    step_p95_s: 3.0
+  # Added after the first vLLM run (2026-10-21), so it is post-hoc: on the first (A40-16Q vGPU) run one decode token
+  # takes ~19 ms, so a 400-token final answer alone takes ~7.6 s and agent-step can't be met.
+  agent-step-relaxed:
+    step_p95_s: 8.0
+
+# Profile used for the matrix table, the Pareto plot and the `apg plan` default.
+headline_profile: agent-step-relaxed

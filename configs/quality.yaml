@@ -1,0 +1,14 @@
+# Tool-calling quality evaluation (PLAN.md phase 3).
+cases: data/quality/bfcl_subset.jsonl
+cases_per_category: 100          # BFCL simple_python + multiple, 200 cases in total
+seed: 0
+concurrency: 4
+flag_drop_points: 3              # flag a variant this many points below the reference
+
+# Qwen3-8B BF16 fits on the full A40, so the reference is measured: run `apg quality` on the
+# qwen3-8b-bf16 variant and copy its accuracy here. Leave accuracy null until that is done; the
+# report then says "reference not set" instead of guessing.
+reference:
+  variant: qwen3-8b-bf16
+  accuracy: 92.0
+  source: measured with apg quality on vllm, qwen3-8b-bf16, 200 cases, 2026-10-21 (whole A40)

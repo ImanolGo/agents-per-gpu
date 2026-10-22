@@ -1,0 +1,23 @@
+# Model variants under test. Weight sizes are approximate; record the real size after download.
+# quant_path per engine is filled in during phase 3 (see PLAN.md).
+tokenizer: Qwen/Qwen3-8B   # Qwen3-4B and Qwen3-8B share a tokenizer and chat template
+
+variants:
+  qwen3-4b-bf16:
+    hf_id: Qwen/Qwen3-4B
+    dtype: bfloat16
+    weights_gb: 8
+  qwen3-8b-bf16:         # fits now that the benchmark runs on a full 48 GB A40
+    hf_id: Qwen/Qwen3-8B
+    dtype: bfloat16
+    weights_gb: 16.4
+  qwen3-8b-int8:
+    hf_id: JunHowie/Qwen3-8B-GPTQ-Int8   # community checkpoint; Qwen publishes no INT8 Qwen3-8B
+    dtype: int8          # GPTQ weight-only INT8, not W8A8
+    weights_gb: 9
+    quant_path: {}       # set per run with --quant-path when a checkpoint is quantized here
+  qwen3-8b-int4-awq:
+    hf_id: Qwen/Qwen3-8B-AWQ
+    dtype: int4_awq
+    weights_gb: 6
+    quant_path: {}       # set per run with --quant-path when a checkpoint is quantized here
