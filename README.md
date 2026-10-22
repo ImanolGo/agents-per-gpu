@@ -1,21 +1,40 @@
 # agents-per-gpu
 
-**How many concurrent AI agents can one 48 GB A40 serve within a latency budget, and what does each agent step cost?**
+**How many AI agents can one GPU serve before they feel slow, and what does each agent task cost?**
 
-> **Headline (measured 2026-10-21 and 22, one whole A40).** Prefix caching decides agent capacity: with it, vLLM,
-> SGLang and TensorRT-LLM each serve 6 concurrent Qwen3-4B agent sessions within the `interactive` SLO, against
-> 2 to 3 without it, and an agent task costs between a third and two fifths as much. SGLang leads on the 8 s step SLO (4 sessions
-> against 3 for vLLM and 2 for TensorRT-LLM). A quantized Qwen3-8B (INT4-AWQ) serves more agents than the 4B in
-> BF16 at the same tool-calling accuracy. Details, caveats and the method are in
-> [reports/REPORT.md](reports/REPORT.md); every number regenerates from `results/` with `apg report`.
+![Dumbbell chart: concurrent Qwen3-4B agent sessions one NVIDIA A40 serves within the interactive SLO, with prefix caching off and on. vLLM 2 to 6, SGLang 3 to 6, TensorRT-LLM 2 to 6. Cost per agent task falls from 0.0018 to 0.0006 USD on vLLM, 0.0013 to 0.0005 on SGLang and 0.0018 to 0.0006 on TensorRT-LLM.](reports/hero_prefix_caching.png)
 
-![Latency against concurrency, Qwen3-4B BF16](reports/latency_qwen3-4b-bf16.png)
+## In plain words
 
-*Qwen3-4B BF16. Solid lines are the agent workload, dashed lines chat; colours are engines. The red line is the
-SLO and the dotted yellow line the relaxed step limit.*
+An AI agent doesn't ask a model one question. It works in a loop: read the task, call a tool, read the
+result, decide the next step. Every step resends the same long instructions and tool descriptions (about
+2,000 tokens) plus everything that has happened so far, and the user waits for the whole chain. Most LLM
+serving benchmarks measure chat traffic instead, so they say little about how many agents a GPU can run.
 
-Most LLM serving benchmarks report peak tokens per second on chat-shaped traffic. Agent
-traffic looks different:
+This repo measures that. It replays seeded, agent-shaped sessions against three open-source serving
+engines, **vLLM**, **SGLang** and **NVIDIA TensorRT-LLM**, on one rented NVIDIA A40 (48 GB). It raises the
+number of concurrent agents step by step and records the last level at which latency still meets a target
+(an SLO). That number, **agents per GPU**, and the **cost per agent task** at that load are the results.
+
+## What I found
+
+- **Prefix caching is the biggest lever.** Reusing the cached shared prefix lets every engine serve 6
+  concurrent Qwen3-4B agents within the `interactive` SLO, against 2 to 3 without it, and cuts the cost per
+  task to between a third and two fifths.
+- **The engines are close at their default settings.** All three serve 6 agents at the `interactive` SLO.
+  With an 8 s budget per agent step, SGLang leads with 4, then vLLM with 3 and TensorRT-LLM with 2.
+- **A quantized bigger model beats a smaller full-precision one.** Qwen3-8B in INT4-AWQ serves 4 to 6
+  agents at the 8 s step SLO, against 2 to 4 for Qwen3-4B in BF16, at about the same tool-calling accuracy
+  (91 to 92 %). Qwen3-8B in BF16 is too slow per token to meet that budget at all.
+
+![Grouped bar chart: agents per A40 at p95 step latency of 8 s or less, by model and engine (vLLM, SGLang, TensorRT-LLM). Qwen3-4B BF16: 3, 4, 2, accuracy 91.0 %. Qwen3-8B BF16: 0, 0, 0, accuracy 92.0 to 93.0 %. Qwen3-8B INT8: 2, 2, failed to load, accuracy 91.5 to 93.0 %. Qwen3-8B INT4-AWQ: 4, 6, 4 (TensorRT-LLM with its own checkpoint), accuracy 91.0 to 92.0 %.](reports/model_size.png)
+
+Measured 2026-10-21 and 22 on one whole A40. This is one GPU, a synthetic workload, SLOs I chose and
+default engine settings, so read it as a snapshot (see [Limitations](#limitations)). Every number and both
+graphics regenerate from `results/` with `apg report`. The full analysis is
+[reports/REPORT.md](reports/REPORT.md).
+
+## Why agent traffic is different
 
 - **Long shared prefix.** Every request repeats the same system prompt and tool schemas,
   which is often 2,000 tokens or more.
@@ -24,11 +43,9 @@ traffic looks different:
 - **Short outputs, many round trips.** Most steps produce a short tool call. The user waits
   for the whole chain, not for one answer.
 
-This repo measures that traffic on three serving stacks: **TensorRT-LLM**, **vLLM** and
-**SGLang**. It runs on a single, full NVIDIA A40 (48 GB, rented by the hour). Every engine gets the same
-workload and the same client. The headline number is not peak throughput. It is the
-**number of concurrent agents served while the latency SLO still holds**, plus the
-**cost per agent task** at that load.
+So the headline here is not peak tokens per second. It is the **number of concurrent agents served while the
+latency SLO still holds**, plus the **cost per agent task** at that load. Every engine gets the same workload
+and the same client.
 
 ## The questions
 
@@ -98,10 +115,11 @@ the test matrix with the cells that could not run) are in [reports/results.md](r
 scheduler settings comparison is in `reports/aligned/`. The written analysis is
 [reports/REPORT.md](reports/REPORT.md).
 
-![Capacity against accuracy](reports/pareto_accuracy_capacity.png)
+![Latency against concurrency, Qwen3-4B BF16](reports/latency_qwen3-4b-bf16.png)
 
-*Each point is an engine and model variant. TensorRT-LLM's INT4-AWQ point (orange diamond) is a checkpoint I
-quantized myself, because that engine could not load the published ones.*
+*Latency against concurrency, Qwen3-4B BF16. Solid lines are the agent workload, dashed lines chat; colours are
+engines. The red line is the SLO and the dotted yellow line the relaxed step limit. Capacity against accuracy for
+every engine and variant is in [reports/pareto_accuracy_capacity.png](reports/pareto_accuracy_capacity.png).*
 
 ## Quickstart
 

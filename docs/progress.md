@@ -2,6 +2,14 @@
 
 Newest entry first. One entry per work session: what was done, what was measured, what is still open.
 
+## 2026-10-22: README graphics
+
+- Added `src/agents_per_gpu/figures.py`: a prefix-caching headline (agents per GPU off and on, cost per task) and
+  a model-size comparison (agents at the 8 s step SLO with tool-calling accuracy). `apg report` now writes them
+  as `reports/hero_prefix_caching.png` and `reports/model_size.png`; no number changed in `reports/results.md`.
+- Rewrote the top of the README in plain words, with the findings and both graphics.
+- Tests: one new test for the figures; ruff and pytest pass (71 tests).
+
 ## 2026-10-22 (release): history squashed, plan and README brought up to date
 
 - The public history is one commit. The earlier 23 local commits were squashed before the first push because

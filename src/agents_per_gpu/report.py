@@ -23,6 +23,7 @@ from agents_per_gpu.analysis import (  # noqa: E402
     load_summaries,
     read_cells,
 )
+from agents_per_gpu.figures import plot_caching_hero, plot_model_size  # noqa: E402
 from agents_per_gpu.metrics import cv  # noqa: E402
 
 NOISE_FLAG = 0.10  # PLAN.md: above this, raise the number of repeats
@@ -369,6 +370,12 @@ def build_report(
     pareto = plot_pareto(summaries, slo_cfg, quality, reports_dir / "pareto_accuracy_capacity.png")
     if pareto:
         written.append(pareto)
+    for fig in (
+        plot_caching_hero(summaries, slo_cfg, hourly, reports_dir / "hero_prefix_caching.png"),
+        plot_model_size(summaries, slo_cfg, quality, reports_dir / "model_size.png"),
+    ):
+        if fig:
+            written.append(fig)
 
     digests = sorted(
         {f"{s['engine']}: {s['image_digest']}" for s in summaries if s["image_digest"]}

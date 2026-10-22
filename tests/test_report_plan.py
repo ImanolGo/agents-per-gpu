@@ -8,6 +8,7 @@ from helpers import write_ladder
 from agents_per_gpu import config
 from agents_per_gpu.analysis import add_cost, append_cell, capacity_rows, load_summaries
 from agents_per_gpu.cli import main
+from agents_per_gpu.figures import plot_caching_hero, plot_model_size
 from agents_per_gpu.plan import build_plan
 from agents_per_gpu.report import build_report
 
@@ -201,3 +202,18 @@ def test_own_quantization_is_marked_in_matrix_and_footnote():
     assert list(own) == [("trtllm", "v")]
     assert "own PTQ of X" in _own_footnote(own)
     assert _own_footnote({}) == ""
+
+
+def test_readme_figures(tmp_path):
+    """The hero needs caching off and on for every engine; the model-size plot draws what exists."""
+    results = tmp_path / "r"
+    write_ladder(results, PASSING_TO_16)
+    summaries = load_summaries(results)
+    assert plot_caching_hero(summaries, SLO, SLICE_USD, tmp_path / "hero.png") is None
+    for engine in ("vllm", "sglang", "trtllm"):
+        for cache in (False, True):
+            if (engine, cache) != ("vllm", True):  # written above
+                write_ladder(results, PASSING_TO_16, engine=engine, prefix_cache=cache)
+    summaries = load_summaries(results)
+    assert plot_caching_hero(summaries, SLO, SLICE_USD, tmp_path / "hero.png").exists()
+    assert plot_model_size(summaries, SLO, {}, tmp_path / "model.png").exists()

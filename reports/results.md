@@ -401,3 +401,5 @@ _None recorded._
 ![latency_qwen3-8b-int4-awq](latency_qwen3-8b-int4-awq.png)
 ![latency_qwen3-8b-int8](latency_qwen3-8b-int8.png)
 ![pareto_accuracy_capacity](pareto_accuracy_capacity.png)
+![hero_prefix_caching](hero_prefix_caching.png)
+![model_size](model_size.png)
